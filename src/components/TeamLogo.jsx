@@ -1,4 +1,4 @@
-import { cn } from "../lib/utils.js";
+import { cn } from "../libs/utils";
 
 export function TeamLogo({ team, size = "md", className, reveal = false, glow = false }) {
   const sizeClasses = {

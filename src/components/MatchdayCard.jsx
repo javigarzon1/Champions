@@ -1,6 +1,6 @@
-import { getCountryFlag } from "../data/teams.js";
+import { getCountryFlag } from "../data/team.js";
 import { TeamLogo } from "./TeamLogo.jsx";
-import { cn } from "../lib/utils.js";
+import { cn } from "../libs/utils.js";
 
 export function MatchdayCard({ matchday, matches, isActive, isRevealing }) {
   return (

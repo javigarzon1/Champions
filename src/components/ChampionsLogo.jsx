@@ -1,4 +1,4 @@
-import { cn } from "../lib/utils.js";
+import { cn } from "../libs/utils";
 
 export function ChampionsLogo({ className, size = "md" }) {
   const sizeClasses = {

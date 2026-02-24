@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { teams, getCountryFlag } from "../data/teams.js";
+import { teams, getCountryFlag } from "../data/team.js";
 import { TeamLogo } from "./TeamLogo.jsx";
-import { cn } from "../lib/utils.js";
+import { cn } from "../libs/utils";
 
 export function TeamResults({ matches }) {
   const [selectedTeam, setSelectedTeam] = useState(null);

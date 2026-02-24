@@ -1,6 +1,6 @@
-import { getTeamsByPot, getCountryFlag } from "../data/teams.js";
+import { getTeamsByPot, getCountryFlag } from "../data/team.js";
 import { TeamLogo } from "./TeamLogo.jsx";
-import { cn } from "../lib/utils.js";
+import { cn } from "../libs/utils.js";
 
 export function PotDisplay({ potNumber, drawnTeams, currentTeam, isActive }) {
   const teams = getTeamsByPot(potNumber);
