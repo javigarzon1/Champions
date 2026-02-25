@@ -14,7 +14,7 @@ export const teams = [
   { id: "leverkusen", name: "Bayer Leverkusen", shortName: "LEV", country: "GER", city: "Leverkusen", pot: 2, logo: "https://upload.wikimedia.org/wikipedia/en/5/59/Bayer_04_Leverkusen_logo.svg" },
   { id: "atletico", name: "Atlético Madrid", shortName: "ATM", country: "ESP", city: "Madrid", pot: 2, logo: "/escudos/atletico.png" },
   { id: "atalanta", name: "Atalanta", shortName: "ATA", country: "ITA", city: "Bergamo", pot: 2, logo: "https://upload.wikimedia.org/wikipedia/en/6/66/AtalantaBC.svg" },
-  { id: "juventus", name: "Juventus", shortName: "JUV", country: "ITA", city: "Turin", pot: 2, logo: "/escudos/juventus.png" },
+  { id: "juventus", name: "Juventus", shortName: "JUV", country: "ITA", city: "Turin", pot: 2, logo: "../../public/escudos/juventus.png" },
   { id: "benfica", name: "SL Benfica", shortName: "BEN", country: "POR", city: "Lisbon", pot: 2, logo: "https://upload.wikimedia.org/wikipedia/en/a/a2/SL_Benfica_logo.svg" },
   { id: "arsenal", name: "Arsenal", shortName: "ARS", country: "ENG", city: "London", pot: 2, logo: "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" },
   { id: "bruges", name: "Club Brugge", shortName: "BRU", country: "BEL", city: "Bruges", pot: 2, logo: "https://upload.wikimedia.org/wikipedia/en/d/d0/Club_Brugge_KV_logo.svg" },
@@ -22,13 +22,13 @@ export const teams = [
   { id: "milan", name: "AC Milan", shortName: "MIL", country: "ITA", city: "Milan", pot: 2, logo: "https://upload.wikimedia.org/wikipedia/commons/d/d0/Logo_of_AC_Milan.svg" },
 
   // Pot 3
-  { id: "feyenoord", name: "Feyenoord", shortName: "FEY", country: "NED", city: "Rotterdam", pot: 3, logo: "/escudos/feyenoord.png" },
-  { id: "sporting", name: "Sporting CP", shortName: "SCP", country: "POR", city: "Lisbon", pot: 3, logo: "/escudos/sporting.png" },
+  { id: "feyenoord", name: "Feyenoord", shortName: "FEY", country: "NED", city: "Rotterdam", pot: 3, logo: "../../public/escudos/feyenoord.png" },
+  { id: "sporting", name: "Sporting CP", shortName: "SCP", country: "POR", city: "Lisbon", pot: 3, logo: "../../public/escudos/sporting.png" },
   { id: "psv", name: "PSV Eindhoven", shortName: "PSV", country: "NED", city: "Eindhoven", pot: 3, logo: "https://upload.wikimedia.org/wikipedia/en/0/05/PSV_Eindhoven.svg" },
-  { id: "dinamo", name: "Dinamo Zagreb", shortName: "DIN", country: "CRO", city: "Zagreb", pot: 3, logo: "/escudos/dinamo.png" },
+  { id: "dinamo", name: "Dinamo Zagreb", shortName: "DIN", country: "CRO", city: "Zagreb", pot: 3, logo: "../../public/escudos/dinamo.png" },
   { id: "salzburg", name: "RB Salzburg", shortName: "SAL", country: "AUT", city: "Salzburg", pot: 3, logo: "https://upload.wikimedia.org/wikipedia/en/7/77/FC_Red_Bull_Salzburg_logo.svg" },
   { id: "lille", name: "LOSC Lille", shortName: "LIL", country: "FRA", city: "Lille", pot: 3, logo: "https://upload.wikimedia.org/wikipedia/en/3/3f/Lille_OSC_2018_logo.svg" },
-  { id: "crvena", name: "Crvena Zvezda", shortName: "CZV", country: "SRB", city: "Belgrade", pot: 3, logo: "/escudos/crvena.png" },
+  { id: "crvena", name: "Crvena Zvezda", shortName: "CZV", country: "SRB", city: "Belgrade", pot: 3, logo: "../../public/escudos/crvena.png" },
   { id: "young-boys", name: "Young Boys", shortName: "YB", country: "SUI", city: "Bern", pot: 3, logo: "https://upload.wikimedia.org/wikipedia/en/6/6b/BSC_Young_Boys_logo.svg" },
   { id: "celtic", name: "Celtic", shortName: "CEL", country: "SCO", city: "Glasgow", pot: 3, logo: "https://upload.wikimedia.org/wikipedia/en/3/35/Celtic_FC.svg" },
 
@@ -36,12 +36,12 @@ export const teams = [
   { id: "slovan", name: "Slovan Bratislava", shortName: "SLO", country: "SVK", city: "Bratislava", pot: 4, logo: "../../public/escudos/slovan.png" },
   { id: "monaco", name: "AS Monaco", shortName: "MON", country: "FRA", city: "Monaco", pot: 4, logo: "../../public/escudos/monaco.png" },
   { id: "sparta", name: "Sparta Praha", shortName: "SPA", country: "CZE", city: "Prague", pot: 4, logo: "../../public/escudos/sparta.png" },
-  { id: "aston-villa", name: "Aston Villa", shortName: "AVL", country: "ENG", city: "Birmingham", pot: 4, logo: "public/escudos/aston-villa.png" },
+  { id: "aston-villa", name: "Aston Villa", shortName: "AVL", country: "ENG", city: "Birmingham", pot: 4, logo: "../../public/escudos/aston-villa.png" },
   { id: "bologna", name: "Bologna", shortName: "BOL", country: "ITA", city: "Bologna", pot: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/5/5b/Bologna_F.C._1909_logo.svg" },
-  { id: "girona", name: "Girona", shortName: "GIR", country: "ESP", city: "Girona", pot: 4, logo: "public/escudos/girona.png" },
+  { id: "girona", name: "Girona", shortName: "GIR", country: "ESP", city: "Girona", pot: 4, logo: "../../public/escudos/girona.png" },
   { id: "stuttgart", name: "VfB Stuttgart", shortName: "STU", country: "GER", city: "Stuttgart", pot: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/e/eb/VfB_Stuttgart_1893_Logo.svg" },
   { id: "sturm", name: "Sturm Graz", shortName: "STG", country: "AUT", city: "Graz", pot: 4, logo: "https://upload.wikimedia.org/wikipedia/en/9/91/SK_Sturm_Graz_logo.svg" },
-  { id: "brest", name: "Stade Brestois", shortName: "BRE", country: "FRA", city: "Brest", pot: 4, logo: "public/escudos/brest.png" },
+  { id: "brest", name: "Stade Brestois", shortName: "BRE", country: "FRA", city: "Brest", pot: 4, logo: "../../public/escudos/brest.png" },
 ];
 
 export const getTeamsByPot = (pot) => {

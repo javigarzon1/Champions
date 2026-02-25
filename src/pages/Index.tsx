@@ -1,37 +1,98 @@
 import { useState, useCallback, useEffect } from "react";
-import { ChampionsLogo } from "../components/ChampionsLogo";
-import { PotDisplay } from "../components/PotDisplay";
-import { MatchdayCard } from "../components/MatchdayCard";
-import { StandingsTable } from "../components/StandingsTable";
-import { TeamResults } from "../components/TeamResults";
-import { DrawBall } from "../components/DrawBall";
-import { Button } from "../components/ui/button";
-import { teams, Team } from "../data/teams";
-import { generateDraw, simulateMatch, calculateStandings, Match, DrawResult, TeamStanding } from "../utils/drawEngine";
-import { cn } from "../libs/utils";
-import { Play, RotateCcw, Trophy, Calendar, Users, Sparkles } from "lucide-react";
+import { ChampionsLogo } from "../components/ChampionsLogo.jsx";
+import { PotDisplay } from "../components/PotDisplay.jsx";
+import { MatchdayCard } from "../components/MatchdayCard.jsx";
+import { StandingsTable } from "../components/StandingsTable.jsx";
+import { TeamResults } from "../components/TeamResults.jsx";
+import { DrawBall } from "../components/DrawBall.jsx";
+import { Button } from "../components/ui/button.jsx";
+import { teams } from "../data/teams.js";
+import { generateDraw, simulateMatch, calculateStandings } from "../utils/drawEngine.js";
+import { cn } from "../libs/utils.js";
+import { Play, RotateCcw, Trophy, Calendar, Users, Sparkles, Hand, Zap, CircleDot } from "lucide-react";
 
-type ViewMode = "draw" | "matchdays" | "standings" | "results";
-
+// Simulador de Sorteo de la Champions League
 const Index = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("draw");
-  const [drawResult, setDrawResult] = useState<DrawResult | null>(null);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [standings, setStandings] = useState<TeamStanding[]>([]);
-  const [drawnTeams, setDrawnTeams] = useState<Set<string>>(new Set());
-  const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
-  const [currentPot, setCurrentPot] = useState<number>(1);
+  const [viewMode, setViewMode] = useState("draw");
+  const [drawMode, setDrawMode] = useState("manual"); // "auto" o "manual"
+  const [drawResult, setDrawResult] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [standings, setStandings] = useState([]);
+  const [drawnTeams, setDrawnTeams] = useState(new Set());
+  const [currentTeam, setCurrentTeam] = useState(null);
+  const [currentPot, setCurrentPot] = useState(1);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawComplete, setDrawComplete] = useState(false);
   const [simulationComplete, setSimulationComplete] = useState(false);
-  const [revealingMatchday, setRevealingMatchday] = useState<number | null>(null);
+  const [revealingMatchday, setRevealingMatchday] = useState(null);
+  
+  // Estados del modo manual
+  const [manualDrawStarted, setManualDrawStarted] = useState(false);
+  const [teamsQueue, setTeamsQueue] = useState([]);
+  const [manualDrawIndex, setManualDrawIndex] = useState(0);
+  const [isRevealing, setIsRevealing] = useState(false);
 
-  // Initialize standings on mount
+  // Inicializar clasificación al montar
   useEffect(() => {
     setStandings(calculateStandings([]));
   }, []);
 
-  const startDraw = useCallback(async () => {
+  // Preparar sorteo manual
+  const prepareManualDraw = useCallback(() => {
+    const result = generateDraw();
+    setDrawResult(result);
+    
+    // Mezclar equipos para la presentación del sorteo
+    const shuffledTeams = [...teams].sort(() => Math.random() - 0.5);
+    setTeamsQueue(shuffledTeams);
+    setManualDrawIndex(0);
+    setManualDrawStarted(true);
+    setDrawnTeams(new Set());
+    setCurrentTeam(null);
+    setDrawComplete(false);
+    setSimulationComplete(false);
+    setMatches([]);
+    setStandings(calculateStandings([]));
+  }, []);
+
+  // Extraer siguiente bola manualmente
+  const extractNextBall = useCallback(async () => {
+    if (manualDrawIndex >= teamsQueue.length || isRevealing) return;
+    
+    setIsRevealing(true);
+    const team = teamsQueue[manualDrawIndex];
+    
+    // Mostrar animación de la bola
+    setCurrentPot(team.pot);
+    setCurrentTeam(team);
+    
+    // Esperar la revelación
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    
+    // Añadir a equipos sorteados
+    setDrawnTeams(prev => new Set([...prev, team.id]));
+    setCurrentTeam(null);
+    setIsRevealing(false);
+    
+    const nextIndex = manualDrawIndex + 1;
+    setManualDrawIndex(nextIndex);
+    
+    // Comprobar si se completó
+    if (nextIndex >= teamsQueue.length) {
+      setDrawComplete(true);
+      setMatches(drawResult.matches);
+      
+      // Revelar jornadas
+      for (let i = 0; i < 8; i++) {
+        setRevealingMatchday(i + 1);
+        await new Promise(resolve => setTimeout(resolve, 400));
+      }
+      setRevealingMatchday(null);
+    }
+  }, [manualDrawIndex, teamsQueue, isRevealing, drawResult]);
+
+  // Sorteo automático
+  const startAutoDraw = useCallback(async () => {
     setIsDrawing(true);
     setDrawnTeams(new Set());
     setCurrentTeam(null);
@@ -40,11 +101,11 @@ const Index = () => {
     setMatches([]);
     setStandings(calculateStandings([]));
 
-    // Generate the draw
+    // Generar el sorteo
     const result = generateDraw();
     setDrawResult(result);
 
-    // Animate drawing each team
+    // Animar el sorteo de cada equipo
     const allTeams = [...teams];
     for (let i = 0; i < allTeams.length; i++) {
       const team = allTeams[i];
@@ -63,7 +124,7 @@ const Index = () => {
     setIsDrawing(false);
     setMatches(result.matches);
 
-    // Reveal matchdays one by one
+    // Revelar jornadas una a una
     for (let i = 0; i < 8; i++) {
       setRevealingMatchday(i + 1);
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -74,7 +135,7 @@ const Index = () => {
   const simulateAllMatches = useCallback(async () => {
     if (!drawResult) return;
 
-    const simulatedMatches: Match[] = [];
+    const simulatedMatches = [];
     
     for (let matchday = 0; matchday < 8; matchday++) {
       const matchdayMatches = drawResult.matchdays[matchday].map(m => simulateMatch(m));
@@ -99,12 +160,19 @@ const Index = () => {
     setDrawComplete(false);
     setSimulationComplete(false);
     setRevealingMatchday(null);
+    setManualDrawStarted(false);
+    setTeamsQueue([]);
+    setManualDrawIndex(0);
+    setIsRevealing(false);
     setViewMode("draw");
   }, []);
 
+  const remainingBalls = teamsQueue.length - manualDrawIndex;
+  const currentPotForManual = teamsQueue[manualDrawIndex]?.pot || 1;
+
   return (
     <div className="min-h-screen starfield">
-      {/* Hero Header */}
+      {/* Cabecera principal */}
       <header className="relative py-8 px-4 border-b border-border/50">
         <div className="container mx-auto">
           <div className="flex flex-col items-center gap-4">
@@ -119,13 +187,13 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Navegación */}
           <nav className="flex flex-wrap justify-center gap-2 mt-8">
             {[
-              { id: "draw" as ViewMode, label: "Sorteo", icon: Sparkles },
-              { id: "matchdays" as ViewMode, label: "Jornadas", icon: Calendar },
-              { id: "standings" as ViewMode, label: "Clasificación", icon: Trophy },
-              { id: "results" as ViewMode, label: "Resultados", icon: Users },
+              { id: "draw", label: "Sorteo", icon: Sparkles },
+              { id: "matchdays", label: "Jornadas", icon: Calendar },
+              { id: "standings", label: "Clasificación", icon: Trophy },
+              { id: "results", label: "Resultados", icon: Users },
             ].map(({ id, label, icon: Icon }) => (
               <Button
                 key={id}
@@ -142,23 +210,150 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Draw View */}
+        {/* Vista del Sorteo */}
         {viewMode === "draw" && (
           <div className="space-y-8">
-            {/* Controls */}
+            {/* Selector de modo - Solo mostrar si no ha empezado */}
+            {!manualDrawStarted && !isDrawing && !drawComplete && (
+              <div className="flex flex-col items-center gap-6">
+                <h2 className="font-display text-2xl font-bold text-gradient-gold">
+                  Selecciona el Modo de Sorteo
+                </h2>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <button
+                    onClick={() => setDrawMode("manual")}
+                    className={cn(
+                      "group relative p-6 rounded-xl border-2 transition-all duration-300 min-w-[200px]",
+                      drawMode === "manual"
+                        ? "border-primary bg-primary/10 shadow-lg shadow-primary/20"
+                        : "border-border/50 bg-card/50 hover:border-primary/50"
+                    )}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <Hand className={cn(
+                        "w-12 h-12 transition-colors",
+                        drawMode === "manual" ? "text-primary" : "text-muted-foreground"
+                      )} />
+                      <span className="font-display text-lg font-bold">Manual</span>
+                      <span className="text-sm text-muted-foreground text-center">
+                        Extrae las bolas una a una
+                      </span>
+                    </div>
+                    {drawMode === "manual" && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-xs text-primary-foreground">✓</span>
+                      </div>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={() => setDrawMode("auto")}
+                    className={cn(
+                      "group relative p-6 rounded-xl border-2 transition-all duration-300 min-w-[200px]",
+                      drawMode === "auto"
+                        ? "border-primary bg-primary/10 shadow-lg shadow-primary/20"
+                        : "border-border/50 bg-card/50 hover:border-primary/50"
+                    )}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <Zap className={cn(
+                        "w-12 h-12 transition-colors",
+                        drawMode === "auto" ? "text-primary" : "text-muted-foreground"
+                      )} />
+                      <span className="font-display text-lg font-bold">Automático</span>
+                      <span className="text-sm text-muted-foreground text-center">
+                        Sorteo completo animado
+                      </span>
+                    </div>
+                    {drawMode === "auto" && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-xs text-primary-foreground">✓</span>
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Controles */}
             <div className="flex flex-wrap justify-center gap-4">
-              {!drawComplete ? (
+              {!drawComplete && !manualDrawStarted && !isDrawing && (
                 <Button
                   variant="hero"
                   size="xl"
-                  onClick={startDraw}
-                  disabled={isDrawing}
+                  onClick={drawMode === "manual" ? prepareManualDraw : startAutoDraw}
                   className="min-w-[200px]"
                 >
                   <Play className="w-5 h-5" />
-                  {isDrawing ? "Sorteando..." : "Iniciar Sorteo"}
+                  Iniciar Sorteo
                 </Button>
-              ) : (
+              )}
+              
+              {/* Modo manual: Botón de extraer bola */}
+              {manualDrawStarted && !drawComplete && (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Bombo {currentPotForManual} • Quedan {remainingBalls} bolas
+                    </p>
+                    <div className="flex justify-center gap-1">
+                      {[1, 2, 3, 4].map(pot => (
+                        <div
+                          key={pot}
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
+                            currentPotForManual === pot
+                              ? "bg-primary text-primary-foreground scale-110"
+                              : drawnTeams.size >= pot * 9
+                                ? "bg-muted text-muted-foreground"
+                                : "bg-card border border-border"
+                          )}
+                        >
+                          {pot}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Button
+                    variant="hero"
+                    size="xl"
+                    onClick={extractNextBall}
+                    disabled={isRevealing}
+                    className="min-w-[280px] animate-pulse hover:animate-none"
+                  >
+                    <CircleDot className={cn(
+                      "w-6 h-6 transition-transform",
+                      isRevealing && "animate-spin"
+                    )} />
+                    {isRevealing ? "Revelando..." : "Extraer Bola"}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetSimulation}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Cancelar
+                  </Button>
+                </div>
+              )}
+              
+              {/* Controles del modo automático */}
+              {isDrawing && (
+                <Button
+                  variant="hero"
+                  size="xl"
+                  disabled
+                  className="min-w-[200px]"
+                >
+                  <Play className="w-5 h-5 animate-pulse" />
+                  Sorteando...
+                </Button>
+              )}
+              
+              {drawComplete && (
                 <>
                   {!simulationComplete && (
                     <Button
@@ -182,14 +377,30 @@ const Index = () => {
               )}
             </div>
 
-            {/* Current Draw Ball */}
-            {(isDrawing || currentTeam) && (
+            {/* Bola actual del sorteo */}
+            {(isDrawing || currentTeam || isRevealing) && (
               <div className="flex justify-center">
-                <DrawBall team={currentTeam} isAnimating={!!currentTeam} />
+                <DrawBall team={currentTeam} isAnimating={!!currentTeam || isRevealing} />
               </div>
             )}
 
-            {/* Pots Display */}
+            {/* Barra de progreso del modo manual */}
+            {manualDrawStarted && !drawComplete && (
+              <div className="max-w-md mx-auto">
+                <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                  <span>Progreso</span>
+                  <span>{manualDrawIndex} / {teamsQueue.length}</span>
+                </div>
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-champions-gold transition-all duration-500 ease-out"
+                    style={{ width: `${(manualDrawIndex / teamsQueue.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Visualización de bombos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map(pot => (
                 <PotDisplay
@@ -197,12 +408,12 @@ const Index = () => {
                   potNumber={pot}
                   drawnTeams={drawnTeams}
                   currentTeam={currentPot === pot ? currentTeam : null}
-                  isActive={isDrawing && currentPot === pot}
+                  isActive={(isDrawing || (manualDrawStarted && !drawComplete)) && currentPot === pot}
                 />
               ))}
             </div>
 
-            {/* Quick Stats after draw */}
+            {/* Estadísticas rápidas tras el sorteo */}
             {drawComplete && (
               <div className="card-champions rounded-xl p-6 animate-reveal">
                 <h3 className="font-display text-xl font-bold text-center mb-4 text-gradient-gold">
@@ -233,7 +444,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Matchdays View */}
+        {/* Vista de Jornadas */}
         {viewMode === "matchdays" && (
           <div className="space-y-6">
             {!drawResult ? (
@@ -260,18 +471,18 @@ const Index = () => {
           </div>
         )}
 
-        {/* Standings View */}
+        {/* Vista de Clasificación */}
         {viewMode === "standings" && (
           <StandingsTable standings={standings} />
         )}
 
-        {/* Results View */}
+        {/* Vista de Resultados */}
         {viewMode === "results" && (
           <TeamResults matches={matches} />
         )}
       </main>
 
-      {/* Footer */}
+      {/* Pie de página */}
       <footer className="border-t border-border/50 py-6 mt-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
