@@ -66,11 +66,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border))r;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+   @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
   }
 

@@ -6,7 +6,7 @@ import { StandingsTable } from "../components/StandingsTable";
 import { TeamResults } from "../components/TeamResults";
 import { DrawBall } from "../components/DrawBall";
 import { Button } from "../components/ui/button";
-import { teams, Team } from "../data/team";
+import { teams, Team } from "../data/teams";
 import { generateDraw, simulateMatch, calculateStandings, Match, DrawResult, TeamStanding } from "../utils/drawEngine";
 import { cn } from "../libs/utils";
 import { Play, RotateCcw, Trophy, Calendar, Users, Sparkles } from "lucide-react";

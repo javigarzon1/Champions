@@ -1,4 +1,4 @@
-import { Team, teams } from "../data/team";
+import { Team, teams } from "../data/teams";
 
 export interface Match {
   id: string;
