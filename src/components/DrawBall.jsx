@@ -1,4 +1,4 @@
-import { getCountryFlag } from "../data/team.js";
+import { getCountryFlag } from "../data/teams.js";
 import { TeamLogo } from "./TeamLogo.jsx";
 import { cn } from "../libs/utils.js";
 

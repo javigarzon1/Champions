@@ -1,34 +1,7 @@
-import { Team, teams } from "../data/teams";
-
-export interface Match {
-  id: string;
-  homeTeam: Team;
-  awayTeam: Team;
-  matchday: number;
-  homeGoals?: number;
-  awayGoals?: number;
-  played: boolean;
-}
-
-export interface TeamStanding {
-  team: Team;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  goalsFor: number;
-  goalsAgainst: number;
-  goalDifference: number;
-  points: number;
-}
-
-export interface DrawResult {
-  matches: Match[];
-  matchdays: Match[][];
-}
+import { teams } from "../data/teams.js";
 
 // Fisher-Yates shuffle
-function shuffle<T>(array: T[]): T[] {
+function shuffle(array) {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -37,47 +10,13 @@ function shuffle<T>(array: T[]): T[] {
   return result;
 }
 
-// Check if two teams can play each other
-function canPlay(team1: Team, team2: Team, existingMatches: Match[], matchday: number): boolean {
-  // Can't play team from same country
-  if (team1.country === team2.country) return false;
-  
-  // Can't play same team twice
-  const alreadyPlayed = existingMatches.some(
-    m => (m.homeTeam.id === team1.id && m.awayTeam.id === team2.id) ||
-         (m.homeTeam.id === team2.id && m.awayTeam.id === team1.id)
-  );
-  if (alreadyPlayed) return false;
-  
-  return true;
-}
-
-// Check if a city is already hosting a match on this matchday
-function cityAvailable(city: string, matchdayMatches: Match[]): boolean {
-  return !matchdayMatches.some(m => m.homeTeam.city === city);
-}
-
-// Count how many home/away games a team has
-function getHomeAwayCount(teamId: string, matches: Match[]): { home: number; away: number } {
-  let home = 0;
-  let away = 0;
-  matches.forEach(m => {
-    if (m.homeTeam.id === teamId) home++;
-    if (m.awayTeam.id === teamId) away++;
-  });
-  return { home, away };
-}
-
 // Generate the complete draw
-export function generateDraw(): DrawResult {
+export function generateDraw() {
   const allTeams = [...teams];
-  const matches: Match[] = [];
-  const matchdays: Match[][] = [[], [], [], [], [], [], [], []];
+  const matches = [];
+  const matchdays = [[], [], [], [], [], [], [], []];
   
-  // Each team needs 8 opponents (4 home, 4 away)
-  // We'll create matches ensuring constraints are met
-  
-  const teamMatches: Map<string, { opponents: Set<string>; homeCount: number; awayCount: number }> = new Map();
+  const teamMatches = new Map();
   
   allTeams.forEach(team => {
     teamMatches.set(team.id, { opponents: new Set(), homeCount: 0, awayCount: 0 });
@@ -85,9 +24,9 @@ export function generateDraw(): DrawResult {
   
   // Try to create 8 matchdays
   for (let matchday = 1; matchday <= 8; matchday++) {
-    const matchdayMatches: Match[] = [];
-    const usedTeams = new Set<string>();
-    const usedCities = new Set<string>();
+    const matchdayMatches = [];
+    const usedTeams = new Set();
+    const usedCities = new Set();
     
     // Shuffle teams for this matchday
     const shuffledTeams = shuffle(allTeams);
@@ -95,7 +34,7 @@ export function generateDraw(): DrawResult {
     for (const team1 of shuffledTeams) {
       if (usedTeams.has(team1.id)) continue;
       
-      const team1Data = teamMatches.get(team1.id)!;
+      const team1Data = teamMatches.get(team1.id);
       if (team1Data.opponents.size >= 8) continue;
       
       // Find a valid opponent
@@ -109,12 +48,12 @@ export function generateDraw(): DrawResult {
       );
       
       for (const team2 of potentialOpponents) {
-        const team2Data = teamMatches.get(team2.id)!;
+        const team2Data = teamMatches.get(team2.id);
         if (team2Data.opponents.size >= 8) continue;
         
         // Determine home/away based on balance
-        let homeTeam: Team;
-        let awayTeam: Team;
+        let homeTeam;
+        let awayTeam;
         
         if (team1Data.homeCount < 4 && team2Data.awayCount < 4 && !usedCities.has(team1.city)) {
           homeTeam = team1;
@@ -133,7 +72,7 @@ export function generateDraw(): DrawResult {
         }
         
         // Create match
-        const match: Match = {
+        const match = {
           id: `${matchday}-${homeTeam.id}-${awayTeam.id}`,
           homeTeam,
           awayTeam,
@@ -170,7 +109,7 @@ export function generateDraw(): DrawResult {
 }
 
 // Simulate match results
-export function simulateMatch(match: Match): Match {
+export function simulateMatch(match) {
   const homeGoals = Math.floor(Math.random() * 5);
   const awayGoals = Math.floor(Math.random() * 4);
   
@@ -183,8 +122,8 @@ export function simulateMatch(match: Match): Match {
 }
 
 // Calculate standings
-export function calculateStandings(matches: Match[]): TeamStanding[] {
-  const standingsMap = new Map<string, TeamStanding>();
+export function calculateStandings(matches) {
+  const standingsMap = new Map();
   
   // Initialize standings for all teams
   teams.forEach(team => {
@@ -203,22 +142,22 @@ export function calculateStandings(matches: Match[]): TeamStanding[] {
   
   // Process played matches
   matches.filter(m => m.played).forEach(match => {
-    const home = standingsMap.get(match.homeTeam.id)!;
-    const away = standingsMap.get(match.awayTeam.id)!;
+    const home = standingsMap.get(match.homeTeam.id);
+    const away = standingsMap.get(match.awayTeam.id);
     
     home.played++;
     away.played++;
     
-    home.goalsFor += match.homeGoals!;
-    home.goalsAgainst += match.awayGoals!;
-    away.goalsFor += match.awayGoals!;
-    away.goalsAgainst += match.homeGoals!;
+    home.goalsFor += match.homeGoals;
+    home.goalsAgainst += match.awayGoals;
+    away.goalsFor += match.awayGoals;
+    away.goalsAgainst += match.homeGoals;
     
-    if (match.homeGoals! > match.awayGoals!) {
+    if (match.homeGoals > match.awayGoals) {
       home.won++;
       home.points += 3;
       away.lost++;
-    } else if (match.homeGoals! < match.awayGoals!) {
+    } else if (match.homeGoals < match.awayGoals) {
       away.won++;
       away.points += 3;
       home.lost++;
